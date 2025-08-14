@@ -1,9 +1,9 @@
-name: fcm-topic-test
+name: fcm-token-test
 
 on:
-  schedule:
-    - cron: "*/2 * * * *" # каждые 3 минуты
   workflow_dispatch: {}
+  schedule:
+    - cron: "*/3 * * * *" # каждые 3 минуты
 
 jobs:
   send:
@@ -15,17 +15,19 @@ jobs:
 
       - run: npm i google-auth-library node-fetch@2
 
-      - name: Send push to topic "all"
+      - name: Send silent push directly to token
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          TARGET_FCM_TOKEN: "cqyZqDMuCEEhhahLWG7tdI:APA91bEn7DE5fUiVwA17R19H7GoD7ekET6_2uFFI2_6L2y8yQYTSZmQcQp0cVcDssXfMD130fqWuuSnZqIxkFO9Jicf-IJcmUyOv_A9fRVbWwJ59sL5vADo"
         run: |
           node <<'NODE'
-          const { GoogleAuth } = require('google-auth-library');
+          const {GoogleAuth} = require('google-auth-library');
           const fetch = require('node-fetch');
 
           const creds = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
           const projectId = process.env.FIREBASE_PROJECT_ID;
+          const targetToken = process.env.TARGET_FCM_TOKEN;
 
           (async () => {
             const auth = new GoogleAuth({
@@ -38,19 +40,15 @@ jobs:
             const url = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
             const body = {
               message: {
-                topic: "all",
-                notification: {
-                  title: "Test Push to All",
-                  body: "Hello from FCM topic"
-                },
+                token: targetToken,
                 apns: {
                   headers: {
-                    "apns-push-type": "alert",
-                    "apns-priority": "10"
+                    "apns-push-type": "background",
+                    "apns-priority": "5"
                   },
-                  payload: { aps: { sound: "default" } }
+                  payload: { aps: { "content-available": 1 } }
                 },
-                data: { type: "test_broadcast" }
+                data: { type: "widget_weather_refresh" }
               }
             };
 

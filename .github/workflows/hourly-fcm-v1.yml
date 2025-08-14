@@ -1,6 +1,8 @@
 name: fcm-topic-test
 
 on:
+  schedule:
+    - cron: "*/1 * * * *" # каждые 3 минуты
   workflow_dispatch: {}
 
 jobs:

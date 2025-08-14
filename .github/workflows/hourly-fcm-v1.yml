@@ -19,7 +19,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          TARGET_FCM_TOKEN: "cqyZqDMuCEEhhahLWG7tdI:APA91bEn7DE5fUiVwA17R19H7GoD7ekET6_2uFFI2_6L2y8yQYTSZmQcQp0cVcDssXfMD130fqWuuSnZqIxkFO9Jicf-IJcmUyOv_A9fRVbWwJ59sL5vADo"
+          TARGET_FCM_TOKEN: "all"
         run: |
           node <<'NODE'
           const {GoogleAuth} = require('google-auth-library');

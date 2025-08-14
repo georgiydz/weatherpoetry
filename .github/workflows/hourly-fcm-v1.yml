@@ -1,9 +1,9 @@
-name: hourly-fcm-v1
+name: fcm-token-test
 
 on:
   schedule:
-    - cron: "*/3 * * * *"   # каждый час по UTC
-  workflow_dispatch: {}    # ручной запуск из UI
+    - cron: "*/3 * * * *"   # каждые 3 минуты
+  workflow_dispatch: {}      # можно запустить вручную
 
 jobs:
   send:
@@ -15,10 +15,11 @@ jobs:
 
       - run: npm i google-auth-library node-fetch@2
 
-      - name: Send silent push to /topics/all via FCM v1
+      - name: Send silent push directly to token
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          TARGET_FCM_TOKEN: "cqyZqDMuCEEhhahLWG7tdI:APA91bEn7DE5fUiVwA17R19H7GoD7ekET6_2uFFI2_6L2y8yQYTSZmQcQp0cVcDssXfMD130fqWuuSnZqIxkFO9Jicf-IJcmUyOv_A9fRVbWwJ59sL5vADo"
         run: |
           node - <<'NODE'
           const {GoogleAuth} = require('google-auth-library');
@@ -26,6 +27,7 @@ jobs:
 
           const creds = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
           const projectId = process.env.FIREBASE_PROJECT_ID;
+          const targetToken = process.env.TARGET_FCM_TOKEN;
 
           (async () => {
             const auth  = new GoogleAuth({
@@ -35,38 +37,4 @@ jobs:
             const client = await auth.getClient();
             const token  = await client.getAccessToken();
 
-            const url  = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
-            const body = {
-              message: {
-                topic: "all",
-                // ВАЖНО: silent push для iOS
-                apns: {
-                  headers: {
-                    "apns-push-type": "background",
-                    "apns-priority": "5"
-                  },
-                  payload: { aps: { "content-available": 1 } }
-                },
-                // любые твои ключи
-                data: { type: "widget_weather_refresh" }
-              }
-            };
-
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: {
-                Authorization: `Bearer ${token.token || token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(body)
-            });
-
-            const text = await res.text();
-            if (!res.ok) {
-              console.error('FCM ERROR:', res.status, text);
-              process.exit(1);
-            } else {
-              console.log('FCM OK:', text);
-            }
-          })().catch(e => { console.error(e); process.exit(1); });
-          NODE
+            const

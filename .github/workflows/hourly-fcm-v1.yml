@@ -1,5 +1,5 @@
 name: fcm-token-test
-
+ 
 on:
   schedule:
     - cron: "*/3 * * * *"   # каждые 3 минуты
